@@ -1,4 +1,4 @@
-// Wendle's keys: each one plays a note, and the shell remembers it.
+// Wendle's keys: each one plays a note, the shell remembers it, then hums it back.
 const NOTES = [
   { name: 'C', freq: 261.63 },
   { name: 'D', freq: 293.66 },
@@ -9,72 +9,104 @@ const NOTES = [
   { name: 'B', freq: 493.88 }
 ];
 
-const WAIT_MS = 1500; // how long the shell waits before the echo (step 4)
+const WAIT_MS = 1500; // how long the shell waits before the echo
 let audioCtx = null;
 
-// step 3: the recorded note and the waiting timer
 let recorded = null;
 let waitTimer = null;
+let endTimer = null;
 let waitStart = 0;
 let rafId = 0;
 
 const memoryEl = document.getElementById('memory');
 const fillEl = document.getElementById('fill');
 const hintEl = document.getElementById('hint');
+const keysEl = document.getElementById('keys');
 
-function playNote(freq) {
+function getCtx() {
   if (!audioCtx) {
     const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
+    if (!AC) return null;
     audioCtx = new AC();
   }
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  const now = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.4, now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(now);
-  osc.stop(now + 1.3);
+  return audioCtx;
 }
 
-// the bar fills up while the shell waits
+// one soft sine blip; delay is in seconds from now
+function blip(freq, vol, delay, len, soft) {
+  const ac = getCtx();
+  if (!ac) return;
+  const t = ac.currentTime + delay;
+  const osc = ac.createOscillator();
+  const gain = ac.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(vol, t + (soft ? 0.12 : 0.02));
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  osc.connect(gain);
+  if (soft) {
+    // a lowpass makes the echo sound far away and muffled, like inside a shell
+    const lp = ac.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 900;
+    gain.connect(lp);
+    lp.connect(ac.destination);
+  } else {
+    gain.connect(ac.destination);
+  }
+  osc.start(t);
+  osc.stop(t + len + 0.1);
+}
+
+// the echo: three hums, each quieter than the last
+function hum(freq) {
+  blip(freq, 0.18, 0, 1.0, true);
+  blip(freq, 0.09, 0.55, 1.0, true);
+  blip(freq, 0.04, 1.1, 1.0, true);
+}
+
 function tickBar() {
   const p = Math.min(1, (performance.now() - waitStart) / WAIT_MS);
   fillEl.style.width = (p * 100) + '%';
   if (p < 1) rafId = requestAnimationFrame(tickBar);
 }
 
-// remember the note, then wait a moment
 function record(n) {
   recorded = n;
   clearTimeout(waitTimer);
+  clearTimeout(endTimer);
   cancelAnimationFrame(rafId);
+  fillEl.classList.remove('echo');
   memoryEl.textContent = 'The shell remembers: ' + n.name;
   hintEl.textContent = 'Listening... waiting a moment.';
   waitStart = performance.now();
   tickBar();
   if (window.setShellNote) window.setShellNote(n.name);
   waitTimer = setTimeout(function () {
-    // the wait is over; step 4 will hum recorded.freq back here
-    hintEl.textContent = 'The wait is over. Echo comes next!';
     fillEl.style.width = '100%';
-    if (window.setShellNote) window.setShellNote(null);
+    fillEl.classList.add('echo');
+    hintEl.textContent = 'Hmmmm... the shell hums ' + recorded.name + ' back.';
+    hum(recorded.freq);
+    endTimer = setTimeout(function () {
+      hintEl.textContent = 'Tap another key for a new echo.';
+      if (window.setShellNote) window.setShellNote(null);
+    }, 2200);
   }, WAIT_MS);
 }
 
+let lastBtn = null;
 function press(b, n) {
   b.classList.add('down');
-  playNote(n.freq);
+  if (lastBtn && lastBtn !== b) lastBtn.classList.remove('last');
+  b.classList.add('last');
+  lastBtn = b;
+  setTimeout(function () { b.classList.remove('down'); }, 220);
+  blip(n.freq, 0.4, 0, 1.2, false);
   record(n);
 }
 
-const keysEl = document.getElementById('keys');
 NOTES.forEach(function (n) {
   const b = document.createElement('button');
   b.type = 'button';
@@ -83,20 +115,15 @@ NOTES.forEach(function (n) {
   label.textContent = n.name;
   b.appendChild(label);
   b.setAttribute('aria-label', 'Play note ' + n.name);
-  b.addEventListener('pointerdown', function (e) {
-    e.preventDefault();
+  let lastPress = 0;
+  // one guard so pointer, click and keyboard never play twice for one tap
+  const go = function () {
+    const now = performance.now();
+    if (now - lastPress < 350) return;
+    lastPress = now;
     press(b, n);
-  });
-  const up = function () { b.classList.remove('down'); };
-  b.addEventListener('pointerup', up);
-  b.addEventListener('pointerleave', up);
-  b.addEventListener('pointercancel', up);
-  b.addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
-      e.preventDefault();
-      press(b, n);
-    }
-  });
-  b.addEventListener('keyup', up);
+  };
+  b.addEventListener('pointerdown', function (e) { e.preventDefault(); go(); });
+  b.addEventListener('click', go);
   keysEl.appendChild(b);
 });
