@@ -27,3 +27,35 @@ canvas {
   opacity: 0.8;
   text-align: center;
 }
+/* the keys sit in a row and shrink to fit a phone */
+.keys {
+  display: flex;
+  gap: 6px;
+  width: min(96vw, 460px);
+  margin-top: 8px;
+}
+.key {
+  flex: 1;
+  height: 110px;
+  font: inherit;
+  font-size: 1.2rem;
+  color: #1d2440;
+  background: #f3e6c8;
+  border: 2px solid #c9a96b;
+  border-radius: 6px 6px 14px 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+}
+.key.down {
+  background: #f6c98b;
+  transform: translateY(3px);
+}
+.key:focus-visible {
+  outline: 3px solid #8fc98a;
+}
