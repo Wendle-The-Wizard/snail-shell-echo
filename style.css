@@ -10,35 +10,38 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
+  padding: 8px 12px 20px;
 }
 h1 {
-  font-size: 1.8rem;
-  margin: 8px 0;
+  font-size: 1.5rem;
+  margin: 4px 0;
 }
+/* canvas is sized by height too so keys stay on screen */
 canvas {
-  width: min(92vw, 400px);
+  width: min(80vw, 34vh, 400px);
   height: auto;
   background: #2b3562;
   border-radius: 50%;
   box-shadow: 0 0 30px #0007;
 }
-.hint {
-  opacity: 0.8;
+.hint, .memory {
+  margin: 6px 0;
   text-align: center;
 }
-/* the keys sit in a row and shrink to fit a phone */
+.hint { opacity: 0.85; }
+.memory { font-size: 1.1rem; color: #f6c98b; }
 .keys {
   display: flex;
   gap: 6px;
   width: min(96vw, 460px);
-  margin-top: 8px;
+  margin-top: 4px;
 }
 .key {
   flex: 1;
-  height: 110px;
+  height: 90px;
   font: inherit;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
   color: #1d2440;
   background: #f3e6c8;
   border: 2px solid #c9a96b;
@@ -50,12 +53,26 @@ canvas {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 10px;
+  padding: 0 0 10px;
+  transition: background 0.1s;
 }
 .key.down {
-  background: #f6c98b;
+  background: #8fc98a;
   transform: translateY(3px);
+  box-shadow: 0 0 14px #8fc98a;
 }
 .key:focus-visible {
   outline: 3px solid #8fc98a;
+}
+.bar {
+  width: min(80vw, 300px);
+  height: 10px;
+  background: #2b3562;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  width: 0;
+  background: #f6c98b;
 }
