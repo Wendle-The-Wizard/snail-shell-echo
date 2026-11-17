@@ -47,7 +47,7 @@ function blip(freq, vol, delay, len, soft) {
   gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
   osc.connect(gain);
   if (soft) {
-    // a lowpass makes the echo sound far away and muffled, like inside a shell
+    // a lowpass makes the echo sound far away, like inside a shell
     const lp = ac.createBiquadFilter();
     lp.type = 'lowpass';
     lp.frequency.value = 900;
@@ -80,18 +80,20 @@ function record(n) {
   cancelAnimationFrame(rafId);
   fillEl.classList.remove('echo');
   memoryEl.textContent = 'The shell remembers: ' + n.name;
-  hintEl.textContent = 'Listening... waiting a moment.';
+  hintEl.textContent = 'Listening... the shell glows while it waits.';
   waitStart = performance.now();
   tickBar();
-  if (window.setShellNote) window.setShellNote(n.name);
+  // glow starts now: the shell is listening
+  window.setShellNote(n.name, 'listen');
   waitTimer = setTimeout(function () {
     fillEl.style.width = '100%';
     fillEl.classList.add('echo');
     hintEl.textContent = 'Hmmmm... the shell hums ' + recorded.name + ' back.';
+    window.setShellNote(recorded.name, 'hum');
     hum(recorded.freq);
     endTimer = setTimeout(function () {
       hintEl.textContent = 'Tap another key for a new echo.';
-      if (window.setShellNote) window.setShellNote(null);
+      window.setShellNote(null, 'idle');
     }, 2200);
   }, WAIT_MS);
 }
