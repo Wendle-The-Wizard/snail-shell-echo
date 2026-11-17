@@ -16,7 +16,6 @@ h1 {
   font-size: 1.5rem;
   margin: 4px 0;
 }
-/* canvas is sized by height too so keys stay on screen */
 canvas {
   width: min(80vw, 34vh, 400px);
   height: auto;
@@ -56,7 +55,6 @@ canvas {
   padding: 0 0 10px;
   transition: background 0.1s;
 }
-/* the last key you played stays marked so you can see it registered */
 .key.last {
   border-color: #8fc98a;
   background: #d5ebc9;
