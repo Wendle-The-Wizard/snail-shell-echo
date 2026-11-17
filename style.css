@@ -56,6 +56,11 @@ canvas {
   padding: 0 0 10px;
   transition: background 0.1s;
 }
+/* the last key you played stays marked so you can see it registered */
+.key.last {
+  border-color: #8fc98a;
+  background: #d5ebc9;
+}
 .key.down {
   background: #8fc98a;
   transform: translateY(3px);
@@ -75,4 +80,7 @@ canvas {
   height: 100%;
   width: 0;
   background: #f6c98b;
+}
+.fill.echo {
+  background: #8fc98a;
 }
