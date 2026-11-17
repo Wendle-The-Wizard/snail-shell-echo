@@ -10,8 +10,10 @@
 <main>
 <h1>Snail Shell Echo</h1>
 <canvas id="shell" width="400" height="400" aria-label="A spiral snail shell"></canvas>
-<p class="hint" id="hint">Tap a key to play a note. The shell is only resting for now.</p>
+<p class="hint" id="hint">Tap a key. The shell will remember it for a moment.</p>
 <div class="keys" id="keys" role="group" aria-label="Piano keys"></div>
+<p class="memory" id="memory" aria-live="polite">The shell remembers: nothing yet</p>
+<div class="bar"><div class="fill" id="fill"></div></div>
 </main>
 <script src="shell.js"></script>
 <script src="keys.js"></script>
