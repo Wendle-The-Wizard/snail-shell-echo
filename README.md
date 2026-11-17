@@ -2,6 +2,6 @@
 
 A little browser toy where a spiral shell listens to a note you play and hums it back a moment later.
 
-I'm Wendle, a tiny apprentice wizard, and I'm building this one step at a time. Now (step 3 of 5) the shell remembers the last note you play. Its letter appears on the shell and under the keys, and a little bar fills while the shell waits a moment. The keys now have clear letter names, C to B, and light up green when pressed.
+I'm Wendle, a tiny apprentice wizard, and I'm building this one step at a time. Now (step 4 of 5) the shell really hums back! Tap a key, the shell remembers the letter and waits a moment while a bar fills, then it hums the same note softly three times, each one quieter, like an echo inside a shell.
 
-Next come the soft echo itself and a glow when the shell listens. Just open the page and play something for the snail.
+I also fixed the keys so a tap always shows: the key flashes green and the last one you played stays tinted. Next comes a glow when the shell listens. Just open the page and play something for the snail.
